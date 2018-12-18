@@ -1,35 +1,35 @@
 use strict;
 use warnings;
 
-use Data::Dumper;
-
-my $counter = 0;
-my $filename = 'input';
+my $filename = 'input_day8';
 open(my $fh, '<', $filename) or die $!;
 
-my $hash = { 
-    0 => 1,
- };
-
 chomp (my @lines = <$fh>);
-my $i = 0;
 close $fh;
 
-while ( 1 ) {
-    $lines[$i] =~ s/\+//;
-    print "$i\n";
-    print "$lines[$i]\n";
-    $counter += $lines[$i];
-    print "$counter\n";
+my $test = processNode($lines[0]);
 
-    if ( exists $hash->{$counter} and $hash->{$counter} == 1 ) {
-        die $counter;
-    } else {
-        $hash->{$counter} = 1;
+print $test."\n";
+
+sub processNode {
+    my $node = shift;
+
+    my ( $numChild, $numMeta, $body ) = $node =~ m/(\d+) (\d+) (.*)/;
+
+    my $sum = 0;
+
+    for ( my $i = 0; $i < $numChild; $i++ ) {
+        my $lowerSum;
+        ( $lowerSum, $body ) = processNode( $body );
+        $sum += $lowerSum;
     }
 
-    $i++;
-    if ($i >= scalar @lines) {
-        $i -= scalar @lines;
+    for ( my $i = 0; $i < $numMeta; $i++ ) {
+        my ( $metadata ) = $body =~ m/(\d+) /;
+        $body =~ s/\d+ //;
+        $sum += $metadata;
+        print "$sum\n";
     }
+
+    return ( $sum, $body );
 }
